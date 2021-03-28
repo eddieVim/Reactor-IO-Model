@@ -8,18 +8,15 @@ import java.nio.channels.SocketChannel;
 
 /**
  * @author eddie
- * 收发信息
  */
 public class Handler implements Runnable {
-    private static final int MAXIN = 10000;
-    private static final int MAXOUT = 10000;
+    private static final int MAXIN = 10240;
+    private static final int MAXOUT = 10240;
 
     private final SocketChannel socket;
     private final SelectionKey sk;
-    private ByteBuffer input = ByteBuffer.allocate(MAXIN);
-    private ByteBuffer output = ByteBuffer.allocate(MAXOUT);
-    private static final int READING = 0, SENDING = 1;
-    private int state = READING;
+    private ByteBuffer input = ByteBuffer.allocateDirect(MAXIN);
+    private ByteBuffer output = ByteBuffer.allocateDirect(MAXOUT);
 
     public Handler(SocketChannel socket, Selector sel) throws IOException {
         this.socket = socket;
@@ -53,11 +50,7 @@ public class Handler implements Runnable {
     @Override
     public void run() {
         try {
-            if (state == READING) {
-                read();
-            } else if (state == SENDING) {
-                send();
-            }
+            read();
         } catch (IOException ignored) {
         }
     }
@@ -72,6 +65,9 @@ public class Handler implements Runnable {
         }
     }
 
+    /**
+     * Focus on sending the msg.
+     */
     private class Sender implements Runnable {
         @Override
         public void run(){
@@ -83,13 +79,6 @@ public class Handler implements Runnable {
             if (outputIsComplete()) {
                 sk.cancel();
             }
-        }
-    }
-
-    void send() throws IOException {
-        socket.write(output);
-        if (outputIsComplete()) {
-            sk.cancel();
         }
     }
 }

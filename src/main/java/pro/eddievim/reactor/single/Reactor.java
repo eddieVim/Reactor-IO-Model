@@ -36,6 +36,7 @@ public class Reactor implements Runnable {
         try {
             while (!Thread.interrupted()) {
                 selector.select();
+                // Multiplexing IO events set.
                 Set<SelectionKey> selected = selector.selectedKeys();
                 for (SelectionKey o : selected) {
                     dispatch(o);
@@ -48,12 +49,13 @@ public class Reactor implements Runnable {
     }
 
     void dispatch(SelectionKey k) {
-        Runnable r = (Runnable)(k.attachment());
+        Runnable r = (Runnable) k.attachment();
         if (r != null) {
             r.run();
         }
     }
-    class Acceptor implements Runnable {
+
+    private class Acceptor implements Runnable {
         @Override
         public void run() {
             try {

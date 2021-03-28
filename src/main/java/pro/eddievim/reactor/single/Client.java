@@ -7,9 +7,10 @@ import java.net.Socket;
 
 /**
  * @author eddie
+ * 用于发送数据的
  */
 public class Client {
-    public static void main(String[] args) throws IOException, InterruptedException {
+    public static void main(String[] args) throws IOException {
 
         byte[] input = new byte[1024];
         for (int i = 0; i < 100; i++) {
