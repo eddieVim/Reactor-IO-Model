@@ -21,12 +21,11 @@ public class Handler implements Runnable {
     public Handler(SocketChannel socket, Selector sel) throws IOException {
         this.socket = socket;
         socket.configureBlocking(false);
-        sk = socket.register(sel, 0);
-        sk.attach(this);
-        sk.interestOps(SelectionKey.OP_READ);
+        // register read io event and interested.
+        sk = socket.register(sel, SelectionKey.OP_READ, this);
+        // wakeup all threads which interesting this io event.
         sel.wakeup();
     }
-
 
     private boolean inputIsComplete() {
         return true;
@@ -34,6 +33,7 @@ public class Handler implements Runnable {
     private boolean outputIsComplete() {
         return true;
     }
+
     private void process() {
         // input buffer flip to read state
         input.flip();
@@ -59,8 +59,10 @@ public class Handler implements Runnable {
         socket.read(input);
         if (inputIsComplete()) {
             process();
+            // register write io event and interested.
             sk.attach(new Sender());
             sk.interestOps(SelectionKey.OP_WRITE);
+            // wakeup all threads which interesting this io event.
             sk.selector().wakeup();
         }
     }
