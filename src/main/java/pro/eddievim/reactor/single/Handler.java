@@ -10,13 +10,13 @@ import java.nio.channels.SocketChannel;
  * @author eddie
  */
 public class Handler implements Runnable {
-    private static final int MAXIN = 10240;
-    private static final int MAXOUT = 10240;
+    private static final int MAX_IN = 10240;
+    private static final int MAX_OUT = 10240;
 
     private final SocketChannel socket;
     private final SelectionKey sk;
-    private ByteBuffer input = ByteBuffer.allocateDirect(MAXIN);
-    private ByteBuffer output = ByteBuffer.allocateDirect(MAXOUT);
+    private ByteBuffer input = ByteBuffer.allocateDirect(MAX_IN);
+    private ByteBuffer output = ByteBuffer.allocateDirect(MAX_OUT);
 
     public Handler(SocketChannel socket, Selector sel) throws IOException {
         this.socket = socket;
