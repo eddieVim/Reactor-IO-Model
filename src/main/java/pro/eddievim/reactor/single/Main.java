@@ -8,6 +8,6 @@ import java.io.IOException;
  */
 public class Main {
     public static void main(String[] args) throws IOException {
-        new Thread(new Reactor(11111)).start();
+        new Reactor(11111).run();
     }
 }

@@ -21,8 +21,8 @@ public class Reactor implements Runnable {
         serverSocket = ServerSocketChannel.open();
         serverSocket.socket().bind( new InetSocketAddress(port));
         serverSocket.configureBlocking(false);
-        SelectionKey sk = serverSocket.register(selector, SelectionKey.OP_ACCEPT);
-        sk.attach(new Acceptor());
+        // Multiplexing IO will wakeup this, class acceptor will run.
+        serverSocket.register(selector, SelectionKey.OP_ACCEPT, new Acceptor());
     }
 
     /**
