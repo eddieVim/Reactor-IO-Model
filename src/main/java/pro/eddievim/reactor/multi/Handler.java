@@ -6,9 +6,8 @@ import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author eddie
@@ -23,9 +22,21 @@ public class Handler implements Runnable {
     private ByteBuffer input = ByteBuffer.allocateDirect(MAX_IN);
     private ByteBuffer output = ByteBuffer.allocateDirect(MAX_OUT);
 
+    /**
+     * 所有的执行类共用一个handler
+     */
     private static ThreadPoolExecutor pool =
-            new ThreadPoolExecutor(2, 3, 1, TimeUnit.MINUTES,
-                    new LinkedBlockingQueue<>());
+            new ThreadPoolExecutor(2, 6, 1, TimeUnit.MINUTES,
+                    new ArrayBlockingQueue<>(8),
+                    new ThreadFactory() {
+                        private final AtomicInteger threadNum = new AtomicInteger(1);
+
+                        @Override
+                        public Thread newThread(Runnable r) {
+                            return new Thread(r, "MultiThreads-Handler-NO:" + threadNum.getAndIncrement());
+                        }
+                    },
+                    new ThreadPoolExecutor.CallerRunsPolicy());
 
     public Handler(SocketChannel socket, Selector sel) throws IOException {
         this.socket = socket;
@@ -46,7 +57,7 @@ public class Handler implements Runnable {
     private void process() {
         // input buffer flip to read state
         input.flip();
-        System.out.println("------process------");
+        System.out.println(Thread.currentThread().getName() + "------process------");
         byte[] bytes = new byte[input.limit()];
         input.get(bytes);
         String str = new String(bytes);
@@ -81,7 +92,6 @@ public class Handler implements Runnable {
     }
 
     private class Processor implements Runnable {
-
         @Override
         public void run() {
             processAndHandOff();

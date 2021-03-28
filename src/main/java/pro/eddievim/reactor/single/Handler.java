@@ -37,7 +37,7 @@ public class Handler implements Runnable {
     private void process() {
         // input buffer flip to read state
         input.flip();
-        System.out.println("------process------");
+        System.out.println(Thread.currentThread().getName() + "------process------");
         byte[] bytes = new byte[input.limit()];
         input.get(bytes);
         String str = new String(bytes);
