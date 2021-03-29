@@ -1,4 +1,4 @@
-package pro.eddievim.reactor.multi;
+package pro.eddievim.reactor.pool;
 
 import java.io.IOException;
 import java.io.InputStream;
