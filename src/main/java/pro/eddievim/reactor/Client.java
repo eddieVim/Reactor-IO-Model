@@ -1,4 +1,4 @@
-package pro.eddievim.reactor.pool;
+package pro.eddievim.reactor;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -7,7 +7,7 @@ import java.net.Socket;
 
 /**
  * @author eddie
- * @create 2021/3/28 15:50
+ * 用于发送数据的
  */
 public class Client {
     public static void main(String[] args) throws IOException {
