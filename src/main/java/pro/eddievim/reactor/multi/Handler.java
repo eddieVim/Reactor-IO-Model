@@ -26,14 +26,20 @@ public class Handler implements Runnable {
      * 所有的执行类共用一个handler
      */
     private static ThreadPoolExecutor pool =
-            new ThreadPoolExecutor(2, 6, 1, TimeUnit.MINUTES,
-                    new ArrayBlockingQueue<>(8),
+            new ThreadPoolExecutor(3, 8, 1, TimeUnit.MINUTES,
+                    new ArrayBlockingQueue<>(1),
                     new ThreadFactory() {
                         private final AtomicInteger threadNum = new AtomicInteger(1);
-
                         @Override
                         public Thread newThread(Runnable r) {
-                            return new Thread(r, "MultiThreads-Handler-NO:" + threadNum.getAndIncrement());
+                            Thread t = new Thread(r, "multi-threads-handler-" + threadNum.getAndIncrement());
+                            if (t.isDaemon()) {
+                                t.setDaemon(true);
+                            }
+                            if (t.getPriority() != Thread.NORM_PRIORITY) {
+                                t.setPriority(Thread.NORM_PRIORITY);
+                            }
+                            return t;
                         }
                     },
                     new ThreadPoolExecutor.CallerRunsPolicy());
