@@ -19,9 +19,9 @@ public class SubReactor implements Runnable {
         this.selector = sel;
         socket.configureBlocking(false);
         // register read io event and interested.
-        socket.register(sel, SelectionKey.OP_READ, new Handler(socket, sel));
+        socket.register(sel, SelectionKey.OP_READ, new Handler(this.socket, sel));
         // wakeup all threads which interesting this io event.
-        sel.wakeup();
+        // sel.wakeup();
     }
 
     @Override
@@ -33,7 +33,9 @@ public class SubReactor implements Runnable {
                 Set<SelectionKey> selected = selector.selectedKeys();
                 for (SelectionKey key : selected) {
                     Runnable handler = (Runnable) key.attachment();
-                    handler.run();
+                    if (handler != null) {
+                        handler.run();
+                    }
                 }
                 selected.clear();
             }

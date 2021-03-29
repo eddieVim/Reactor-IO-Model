@@ -7,10 +7,7 @@ import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.Set;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -24,13 +21,12 @@ public class MainReactor implements Runnable {
      */
     private final Selector selector;
     private final ServerSocketChannel serverSocket;
-
-    // 这里数量可以进行动态计算
-    private static final int reactorCounts = 8;
+    
+    private static final int cores = Runtime.getRuntime().availableProcessors();
 
     private static ThreadPoolExecutor pool =
-            new ThreadPoolExecutor(3, reactorCounts, 1, TimeUnit.MINUTES,
-                    new ArrayBlockingQueue<>(1),
+            new ThreadPoolExecutor(3, cores, 1, TimeUnit.MINUTES,
+                    new SynchronousQueue<>(),
                     new ThreadFactory() {
                         private final AtomicInteger threadNum = new AtomicInteger(1);
                         @Override
@@ -61,8 +57,8 @@ public class MainReactor implements Runnable {
         // Multiplexing IO will wakeup this, class acceptor will run.
         serverSocket.register(selector, SelectionKey.OP_ACCEPT, new Acceptor());
 
-        selectors = new Selector[reactorCounts];
-        for (int i = 0; i < reactorCounts; i++) {
+        selectors = new Selector[cores];
+        for (int i = 0; i < cores; i++) {
             selectors[i] = Selector.open();
         }
     }
